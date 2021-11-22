@@ -1,5 +1,5 @@
 import { Leave } from "../entity/Leave";
-import { Arg, Ctx, Field, InputType, Mutation, ObjectType, Query, Resolver, UseMiddleware } from "type-graphql";
+import { Arg, Ctx, Field, InputType, Int, Mutation, ObjectType, Query, Resolver, UseMiddleware } from "type-graphql";
 import { isAuthenticated } from "../Authenticate";
 import { MyContext } from "src/config/MyContext";
 import { User } from "../entity/User";
@@ -11,6 +11,17 @@ class LeaveInput{
 
     @Field({nullable:false})
     end_date:Date;
+}
+@InputType({description:"holds data for apply leave"})
+class LeaveUpdateInput{
+    @Field({nullable:true})
+    start_date: Date;
+
+    @Field({nullable:true})
+    end_date:Date;
+
+    @Field({nullable:true})
+    status:'pending'|'approved'|'denied';
 }
 
 @ObjectType()
@@ -79,5 +90,22 @@ export class LeaveResolver{
         leave.save();
 
         return leave;
+    }
+
+    @Mutation(() => Boolean)
+    @UseMiddleware(isAuthenticated)
+    async updateLeave(
+        @Arg("leave_id", () => Int) leave_id: number,
+        @Arg("leave_input", () => LeaveUpdateInput) leave_input: LeaveUpdateInput
+    ) {
+        await Leave.update({id:leave_id}, leave_input);
+        return true;
+    }
+
+    @Mutation(() => Boolean)
+    @UseMiddleware(isAuthenticated)
+    async cancelLeave(@Arg("leave_id", () => Int) leave_id: number) {
+        await Leave.delete({id:leave_id});
+        return true;
     }
 }

@@ -27,6 +27,7 @@ export class User extends BaseEntity{
     @Min(0)
     leave_balance:number;
 
+    @Field(()=>[Leave])
     @OneToMany(_type => Leave, leave => leave.user)
     leaves: Promise<Leave[]>
 }
