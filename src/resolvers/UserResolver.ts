@@ -1,8 +1,11 @@
-import { Arg, Field, InputType, Int, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Ctx, Field, InputType, Int, Mutation, ObjectType, Query, Resolver, UseMiddleware } from "type-graphql";
 import { User } from "../entity/User";
-import bcrypt from 'bcryptjs';
+import bcrypt, { compare } from 'bcryptjs';
 import { IsEmail, Length } from "class-validator";
 import { IsEmailAlreadyExist } from "../decorators/isEmailAlreadyExist";
+import { isAuthenticated } from "../Authenticate";
+import { MyContext } from "src/config/MyContext";
+import { createAccessToken } from "../config/Authorize";
 
 @InputType({description:"Signup information for new user"})
 class UserInput implements Partial<User>{
@@ -23,32 +26,84 @@ class UserInput implements Partial<User>{
     leave_balance:number;
 }
 
+@InputType({description:"login input for authorization"})
+class LoginInput{
+    @Field()
+    email:string;
+
+    @Field()
+    password:string;
+}
+
+@ObjectType({description:"login response after authorization"})
+class LoginResponse{
+    @Field()
+    accessToken:string;
+
+    @Field()
+    user:User;
+}
+
+
 @Resolver()
 export class UserResolver{
 
+    //fetch current user details
     @Query((_type)=>User,{nullable:true})
+    @UseMiddleware(isAuthenticated)
     async getUser(
-        @Arg('email',{nullable:true}) email:string
+        @Ctx() {payload}:MyContext
     ):Promise<User|undefined>{
-
-        if(email){
-            return await User.findOne({where:{email:email}});
-        }
-        return undefined;
+        return await User.findOne({where:{id:payload?.userId}})
     }
-
+    
+    //fetch all user details
     @Query( ()=>[User])
+    @UseMiddleware(isAuthenticated)
     async getAllUsers():Promise<User[]>{
         return await User.find();
     }
 
+    // signup mutation
     @Mutation(()=>User, {name:"userSignUp"})
     async signup(
         @Arg('user') user:UserInput,
-    ):Promise<User>{
+    ):Promise<User|string>{
         const hashedPassword = await bcrypt.hash(user.password, 12);
 
         user.password=hashedPassword;
-        return await User.create(user).save();
+        try{
+            return await User.create(user).save();
+        }catch(err){
+            return "Failed to signup!";
+        }
+    }
+
+    //login mutation
+    @Mutation( ()=>LoginResponse )
+    async login(
+        @Arg("login_data", ()=> LoginInput) login_data:LoginInput
+    ):Promise<LoginResponse>{
+
+        const user = await User.findOne({where:{email:login_data.email}})
+            if(!user){
+                throw new Error("User doesn't exist!!");
+            }
+            
+            const valid = await compare(login_data.password, user.password);
+            if(!valid){
+                throw new Error("Bad credentials!!");
+            }
+            return {
+                accessToken: createAccessToken(user),
+                user,
+            };
+    }
+
+    @Mutation(()=>Boolean)
+    @UseMiddleware(isAuthenticated)
+    async logout(
+    ){
+        return  true;
     }
 }

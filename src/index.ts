@@ -7,6 +7,7 @@ import cors from "cors";
 import { UserResolver } from "./resolvers/UserResolver";
 import { LeaveResolver } from "./resolvers/LeaveResolver";
 
+
 ( async () => {
     const app = express();
 
@@ -14,7 +15,8 @@ import { LeaveResolver } from "./resolvers/LeaveResolver";
 
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
-            resolvers: [UserResolver, LeaveResolver]
+            resolvers: [UserResolver, LeaveResolver],
+            dateScalarMode:"isoDate"
         }),
         context: ({req, res}) => ({req, res})
     });

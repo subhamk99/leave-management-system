@@ -9,7 +9,7 @@ export class User extends BaseEntity{
 
     @Field(()=> ID)
     @PrimaryGeneratedColumn()
-    readonly id!:number;
+    id!:number;
 
     @Field()
     @Column('text', {nullable:true})

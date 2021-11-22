@@ -20,7 +20,7 @@ export class Leave extends BaseEntity{
 
     @Field()
     @Column({nullable:false,default:'pending'})
-    status!:'pending'|'approved';
+    status!:'pending'|'approved'|'denied';
 
     @ManyToOne(_type => User, user => user.leaves)
     user:Promise<User>;
