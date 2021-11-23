@@ -1,6 +1,6 @@
 import { Leave } from "../entity/Leave";
 import { Arg, Ctx, Field, InputType, Int, Mutation, ObjectType, Query, Resolver, UseMiddleware } from "type-graphql";
-import { isAuthenticated } from "../Authenticate";
+import { isAuthenticated } from "../middleware/Authenticate";
 import { MyContext } from "src/config/MyContext";
 import { User } from "../entity/User";
 

@@ -5,4 +5,5 @@ export interface MyContext{
     res: Response;
 
     payload?: {userId: string};
+    roles: string[];
 }

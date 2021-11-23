@@ -3,7 +3,7 @@ import { User } from "../entity/User";
 import bcrypt, { compare } from 'bcryptjs';
 import { IsEmail, Length } from "class-validator";
 import { IsEmailAlreadyExist } from "../decorators/isEmailAlreadyExist";
-import { isAuthenticated } from "../Authenticate";
+import { isAuthenticated } from "../middleware/Authenticate";
 import { MyContext } from "src/config/MyContext";
 import { createAccessToken } from "../config/Authorize";
 
@@ -58,6 +58,7 @@ export class UserResolver{
     }
     
     //fetch all user details
+    // @Authorized("ADMIN")
     @Query( ()=>[User])
     @UseMiddleware(isAuthenticated)
     async getAllUsers():Promise<User[]>{
@@ -73,7 +74,8 @@ export class UserResolver{
 
         user.password=hashedPassword;
         try{
-            return await User.create(user).save();
+            const created_user = await User.create(user).save();
+            return created_user.save()
         }catch(err){
             return "Failed to signup!";
         }
