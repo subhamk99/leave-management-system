@@ -11,6 +11,6 @@ export const testConn = (drop:boolean = false) => {
         database:"lms_test",
         synchronize:true,
         dropSchema:drop,
-        entities:[__dirname+"../entity/*.ts"],
+        entities:["src/entity/**/*.ts"],
     });
 };

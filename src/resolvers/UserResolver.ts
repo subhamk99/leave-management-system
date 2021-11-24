@@ -58,7 +58,6 @@ export class UserResolver{
     }
     
     //fetch all user details
-    // @Authorized("ADMIN")
     @Query( ()=>[User])
     @UseMiddleware(isAuthenticated)
     async getAllUsers():Promise<User[]>{
