@@ -100,11 +100,4 @@ export class UserResolver{
                 user,
             };
     }
-
-    @Mutation(()=>Boolean)
-    @UseMiddleware(isAuthenticated)
-    async logout(
-    ){
-        return  true;
-    }
 }

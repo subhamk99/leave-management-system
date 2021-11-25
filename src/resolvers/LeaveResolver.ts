@@ -34,6 +34,9 @@ class LeaveResponse{
 
     @Field({nullable:false})
     status:"pending"|"approved"|'denied';
+
+    @Field()
+    id:number;
 }
 
 @Resolver()
@@ -45,7 +48,7 @@ export class LeaveResolver{
     async allLeaves(
         @Ctx() {payload}:MyContext
     ):Promise<Leave[]>{
-        return Leave.find({where:{employee_id:payload?.userId}})
+        return Leave.find({where:{user:{where:{id:payload?.userId}}}});
     }
 
     @Mutation(()=>LeaveResponse)
@@ -68,17 +71,6 @@ export class LeaveResolver{
             throw new Error("Insufficient leaves!!!")
         }
 
-        const user_overlap_leaves = await Leave.find({
-            where:{
-                employee_id:user.id, 
-                start_date:leave_input.start_date,
-                end_date:leave_input.end_date
-            }});
-
-        if(user_overlap_leaves){
-            throw new Error("Duplicate leave!!!");
-        }
-
         user.leave_balance = user.leave_balance-leave_duration;
         await user.save();
 
@@ -87,7 +79,7 @@ export class LeaveResolver{
         leave.end_date = leave_input.end_date;
         leave.status="pending";
         leave.user=Promise.resolve(user);
-        leave.save();
+        await leave.save();
 
         return leave;
     }
