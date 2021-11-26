@@ -73,11 +73,7 @@ export class UserResolver{
 
         user.password=hashedPassword;
         
-        const created_user = await User.create(user).save();
-        if(!created_user){
-            throw new Error("Failed to signup!");
-        }
-        return created_user.save()
+        return await User.create(user).save();
     }
 
     //login mutation
