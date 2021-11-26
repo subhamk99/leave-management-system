@@ -48,7 +48,11 @@ export class LeaveResolver{
     async allLeaves(
         @Ctx() {payload}:MyContext
     ):Promise<Leave[]>{
-        return Leave.find({where:{user:{where:{id:payload?.userId}}}});
+        const user = await User.findOne({where:{id:payload?.userId}});
+        if(!user){
+            throw new Error("User doesn't exist!!!");
+        }
+        return user.leaves;
     }
 
     @Mutation(()=>LeaveResponse)

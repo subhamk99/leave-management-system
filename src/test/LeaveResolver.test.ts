@@ -229,3 +229,57 @@ describe("It checks the cancelLeave mutation",()=>{
         })
     });
 });
+const getAllLeavesQuery = `
+query AllLeaves {
+    allLeaves {
+      id
+      start_date
+      end_date
+      status
+    }
+  }
+`;
+describe("It checks the getAllLeaves query",()=>{
+    it("user doesn't exist",async()=>{
+        const response = await gCall({
+            source:getAllLeavesQuery,
+        });
+        expect(response).toMatchObject({
+            errors:[
+                {
+                    message:"User doesn't exist!!!",
+                    path:[
+                        "allLeaves"
+                    ]
+                }
+            ],
+            data:null
+        });
+    });
+    it("fetch all leaves of logged in user",async()=>{
+        const dbUser = await User.create({
+            name:faker.name.firstName(),
+            email:faker.internet.email(),
+            password:faker.internet.password(),
+            leave_balance:faker.datatype.number(),
+        }).save();
+        await gCall({
+            source:applyLeave,
+            userId:dbUser.id,
+            variableValues:{
+                leaveInput:{
+                    start_date:"2021-11-11",
+                    end_date:"2021-11-13"
+                }
+            }
+        });
+
+        const response = await gCall({
+            source:getAllLeavesQuery,
+            userId:dbUser.id
+        });
+        expect(response.data!.allLeaves[0].start_date).toEqual("2021-11-11T00:00:00.000Z");
+        expect(response.data!.allLeaves[0].end_date).toEqual("2021-11-13T00:00:00.000Z");
+        expect(response.data!.allLeaves[0].status).toEqual("pending");
+    });
+});

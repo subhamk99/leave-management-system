@@ -72,12 +72,12 @@ export class UserResolver{
         const hashedPassword = await bcrypt.hash(user.password, 12);
 
         user.password=hashedPassword;
-        try{
-            const created_user = await User.create(user).save();
-            return created_user.save()
-        }catch(err){
-            return "Failed to signup!";
+        
+        const created_user = await User.create(user).save();
+        if(!created_user){
+            throw new Error("Failed to signup!");
         }
+        return created_user.save()
     }
 
     //login mutation
