@@ -1,0 +1,34 @@
+scalar DateTime
+type User {
+    id:ID!
+    name:String!
+    email:String!
+    leave_balance:Int!
+    leaves:[Leave!]
+}
+input UserInput{
+    name:String!
+    email:String!
+    password:String!
+    leave_balance:Int
+}
+input LoginInput{
+    email:String!
+    password:String!
+}
+type LoginRespone{
+    accessToken:String!
+    user:User
+}
+type Query {
+    getUser:User
+    getAllUsers:[User!]
+}
+type Mutation{
+    signup(user:UserInput):User
+    login(loginData:LoginInput):LoginRespone
+}
+schema{
+    query:Query
+    mutation:Mutation
+}

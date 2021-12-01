@@ -6,8 +6,6 @@ import cors from "cors";
 import fs from "fs";
 import path from "path";
 import { isAuthenticated } from "./middleware/Authenticate";
-// import { isAuthenticated } from "./middleware/Authenticate";
-
 ( async () => {
     const app = express();
 
@@ -21,11 +19,27 @@ import { isAuthenticated } from "./middleware/Authenticate";
     ));
     await createConnection();
 
-    const typeDefs = gql(fs.readFileSync(path.join(__dirname,'schema.graphql'),{encoding:"utf-8"}));
-    const resolvers =require("./graphql/resolvers/Resolver");
+    const user_typedef = gql(fs.readFileSync(
+        path.join(
+            __dirname,'..','src','graphql','typedefs','user','user.graphql')
+            ,{encoding:"utf-8"}));
+    const leave_typeDef = gql(fs.readFileSync(
+        path.join(
+            __dirname,'..','src','graphql','typedefs','leave','leave.graphql')
+            ,{encoding:"utf-8"}));
+
+    const user_resolver =require("./graphql/resolvers/user/user.resolver.ts");
+    const leave_resolver =require("./graphql/resolvers/leave/leave.resolver.ts");
+
     const apolloServer = new ApolloServer({
-         typeDefs:typeDefs,
-         resolvers:resolvers,
+         typeDefs:[
+             user_typedef,
+             leave_typeDef
+         ],
+         resolvers:[
+             user_resolver,
+             leave_resolver
+         ],
          context: async({req}) => {
             return isAuthenticated(req)
          }
