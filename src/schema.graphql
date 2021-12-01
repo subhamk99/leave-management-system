@@ -1,0 +1,69 @@
+scalar DateTime
+type User {
+    id:ID!
+    name:String!
+    email:String!
+    leave_balance:Int!
+    leaves:[Leave!]
+}
+enum LeaveStatus{
+    pending
+    approved
+    denied
+}
+type Leave {
+    id:ID!
+    start_date:DateTime!
+    end_date:DateTime!
+    status:LeaveStatus
+    user:User
+}
+input UserInput{
+    name:String!
+    email:String!
+    password:String!
+    leave_balance:Int
+}
+input LoginInput{
+    email:String!
+    password:String!
+}
+type LoginRespone{
+    accessToken:String!
+    user:User
+}
+input LeaveInput{
+    start_date:DateTime!
+    end_date:DateTime!
+}
+input LeaveUpdateInput{
+    start_date:DateTime!
+    end_date:DateTime!
+    status:LeaveStatus
+}
+type LeaveRespone{
+    start_date:DateTime!
+    end_date:DateTime!
+    status:LeaveStatus!
+    id:Int
+}
+type UserId{
+    userId:String!
+}
+type Query {
+    getUser:User
+    getAllUsers:[User!]
+    allLeaves:[Leave]
+    
+}
+type Mutation{
+    cancelLeave(leave_id:Int):Leave
+    updateLeave(leave_id:Int, leave_input:LeaveInput):Leave
+    applyLeave(leave_input:LeaveInput):LeaveRespone!
+    signup(user:UserInput):User
+    login(loginData:LoginInput):LoginRespone
+}
+schema{
+    query:Query
+    mutation:Mutation
+}

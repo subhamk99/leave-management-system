@@ -1,26 +1,16 @@
 import "reflect-metadata";
 import { createConnection } from "typeorm";
 import express from "express";
-import { ApolloServer } from "apollo-server-express";
-import { buildSchema } from "type-graphql";
+import { ApolloServer, gql } from "apollo-server-express";
 import cors from "cors";
-import { UserResolver } from "./resolvers/UserResolver";
-import { LeaveResolver } from "./resolvers/LeaveResolver";
-
+import fs from "fs";
+import path from "path";
+import { isAuthenticated } from "./middleware/Authenticate";
+// import { isAuthenticated } from "./middleware/Authenticate";
 
 ( async () => {
     const app = express();
 
-    await createConnection();
-
-    const apolloServer = new ApolloServer({
-        schema: await buildSchema({
-            resolvers: [UserResolver, LeaveResolver],
-            dateScalarMode:"isoDate"
-        }),
-        context: ({req, res}) => ({req, res})
-    });
-    
     app.use(cors(
         {
             origin: "*",
@@ -29,6 +19,18 @@ import { LeaveResolver } from "./resolvers/LeaveResolver";
             optionsSuccessStatus: 204,
         }
     ));
+    await createConnection();
+
+    const typeDefs = gql(fs.readFileSync(path.join(__dirname,'schema.graphql'),{encoding:"utf-8"}));
+    const resolvers =require("./graphql/resolvers/Resolver");
+    const apolloServer = new ApolloServer({
+         typeDefs:typeDefs,
+         resolvers:resolvers,
+         context: async({req}) => {
+            return isAuthenticated(req)
+         }
+    });
+    
 
     await apolloServer.start();
 
