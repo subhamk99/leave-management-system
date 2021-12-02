@@ -11,7 +11,7 @@
   "scripts": {
     "start": " ts-node-dev --respawn src/index.ts",
     "db:setup": "ts-node ./src/test-utils/setup.ts",
-    "test": "npm run db:setup && jest --coverage"
+    "test": "jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -49,6 +49,7 @@
     "@types/node": "^16.11.7",
     "babel-core": "^6.26.3",
     "babel-jest": "^27.3.1",
+    "easygraphql-tester": "^6.0.1",
     "faker": "^5.5.3",
     "jest": "^27.3.1",
     "nodemon": "^2.0.15",
